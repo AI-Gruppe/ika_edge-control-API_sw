@@ -1,0 +1,73 @@
+name: Python CI for Ubuntu
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MAIN_PY: app/main.py
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Update Version in Application
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          MAINTAINER_EMAIL="${{ github.actor }}@users.noreply.github.com"
+          BUILD_DATE=$(date -u +'%Y-%m-%d')
+          COMMIT_HASH=${{ github.sha }}
+
+          echo "New Tag: $TAG_NAME"
+          echo "Maintainer: $MAINTAINER_EMAIL"
+          echo "Build Date: $BUILD_DATE"
+          echo "Commit Hash: $COMMIT_HASH"
+
+          sed -i "s/APP_VERSION = \".*\"/APP_VERSION = \"$TAG_NAME\"/" $MAIN_PY
+          sed -i "s/MAINTAINER = \".*\"/MAINTAINER = \"$MAINTAINER_EMAIL\"/" $MAIN_PY
+          sed -i "s/BUILD_DATE = \".*\"/BUILD_DATE = \"$BUILD_DATE\"/" $MAIN_PY
+          sed -i "s/COMMIT_HASH = \".*\"/COMMIT_HASH = \"$COMMIT_HASH\"/" $MAIN_PY
+        shell: bash
+
+      - name: Update version and maintainer email in pyproject.toml
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+          MAINTAINER_EMAIL: ${{ github.actor }}@users.noreply.github.com
+        run: |
+          sed -i 's/^\(version *= *\)APP_VERSION/\1'"$TAG_NAME"'/' pyproject.toml
+          sed -i 's/^\(\s*{ *email *= *\)MAINTAINER_EMAIL/\1'"$MAINTAINER_EMAIL"'/' pyproject.toml
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - name: Build executable
+        run: pyinstaller --name prisma_control_service ${{ env.MAIN_PY }}
+
+      - name: Archive dist folder
+        run: |
+          cd dist
+          zip -r ../dist.zip .
+
+      - name: Upload archived dist folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-linux
+          path: dist.zip
+
+      ###
+      ###  Uncomment the task below and comment out everything after that
+      ###  in case you want to create a release without signing and testing.
+      ###
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          artifacts: dist.zip

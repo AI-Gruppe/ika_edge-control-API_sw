@@ -1,18 +1,19 @@
 [project]
 name = "prisma-control-api"
-version = "1.0.0"
+version = v0.1.0
 description = "PRISMA Experiment Control API for motor and brake control"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 license = { text = "MIT" }
 
 authors = [
-  { name = "Stephan Bökelman", email = "sb@gruppe.ai" }
+  { email = MAINTAINER_EMAIL }
 ]
 
 dependencies = [
   "fastapi>=0.95.0",
   "uvicorn>=0.22.0",
-  "pydantic>=1.10.0"
+  "pydantic>=1.10.0",
+  "pyinstaller>=6.11.1"
 ]
 
