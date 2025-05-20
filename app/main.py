@@ -22,6 +22,12 @@ from fastapi.responses import StreamingResponse
 MAX_BRAKE_AMPERAGE = 3.0
 MAX_PWM_FREQUENCY = 1000.0  # Maximum PWM switching frequency
 
+APP_VERSION = "default"
+COMMIT_HASH = "default"
+BUILD_DATE = "default"
+MAINTAINER = "default"
+
+
 # Configure logging to capture every request
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("prisma_control_api")
@@ -249,6 +255,22 @@ def dl_measurements(model: DownloadModel):
             'Content-Disposition': f'attachment; filename="download_{datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")}.tar"'
         }
     )
+
+@app.get("/version", tags=["Info"])
+async def version():
+    """
+    This is a healthcare endpoint that returns the version information of the application.
+
+    Returns:
+        dict: A dictionary containing the version information.
+    """
+    return {
+        "app_version": APP_VERSION,
+        "commit_hash": COMMIT_HASH,
+        "build_date": BUILD_DATE,
+        "maintainer": MAINTAINER,
+    }
+
 
 # Allow running via `python main.py`
 if __name__ == "__main__":
