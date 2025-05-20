@@ -1,13 +1,13 @@
 [project]
 name = "prisma-control-api"
-version = v0.1.0
+version = "APP_VERSION"
 description = "PRISMA Experiment Control API for motor and brake control"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
 
 authors = [
-  { email = MAINTAINER_EMAIL }
+  { email = "MAINTAINER_EMAIL" }
 ]
 
 dependencies = [
